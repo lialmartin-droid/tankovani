@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#081016" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#edf3f7" media="(prefers-color-scheme: light)" />
+    <meta name="description" content="Osobní evidence tankování, spotřeby a nákladů na auto." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tankování" />
+    <title>Moje tankování</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <svg class="svg-sprite" aria-hidden="true">
+      <symbol id="i-gauge" viewBox="0 0 24 24">
+        <path d="M4.2 17.7a8.5 8.5 0 1 1 15.6 0" />
+        <path d="m12 13 4.4-4.4" />
+        <path d="M7.3 14.5h.01M12 9.2h.01M16.7 14.5h.01" />
+      </symbol>
+      <symbol id="i-list" viewBox="0 0 24 24">
+        <path d="M8 6h12M8 12h12M8 18h12" />
+        <path d="M4 6h.01M4 12h.01M4 18h.01" />
+      </symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24">
+        <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+      </symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.63 15 1.7 1.7 0 0 0 3.08 14H3v-4h.08A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63 1.7 1.7 0 0 0 10 3.08V3h4v.08A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9 1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+      <symbol id="i-fuel" viewBox="0 0 24 24">
+        <path d="M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M3 21h14" />
+        <path d="M7.5 6h5v4h-5zM15 8h2l2 2v7.5a1.5 1.5 0 0 0 3 0V8l-2-2" />
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.4 15.1A8.5 8.5 0 0 1 8.9 3.6 8.5 8.5 0 1 0 20.4 15Z" /></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4L8 8M5 21h14" /></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></symbol>
+      <symbol id="i-car" viewBox="0 0 24 24"><path d="m5 11 1.7-5h10.6l1.7 5M4 11h16a1 1 0 0 1 1 1v6H3v-6a1 1 0 0 1 1-1ZM6 18v2M18 18v2" /><path d="M6.5 14h.01M17.5 14h.01" /></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7h.01" /></symbol>
+    </svg>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="vehicle-mark" aria-hidden="true">
+          <svg><use href="#i-car"></use></svg>
+        </div>
+        <div class="vehicle-title">
+          <p id="vehicleName">Hyundai i20</p>
+          <span id="vehicleDetail">1.2 · 2016 · Natural 95</span>
+        </div>
+        <button class="icon-button" id="quickTheme" type="button" aria-label="Přepnout vzhled">
+          <svg class="theme-icon-dark"><use href="#i-moon"></use></svg>
+          <svg class="theme-icon-light"><use href="#i-sun"></use></svg>
+        </button>
+      </header>
+
+      <main id="mainContent">
+        <section class="view is-active" id="view-overview" data-view="overview" aria-labelledby="overviewTitle">
+          <h1 class="sr-only" id="overviewTitle">Přehled tankování</h1>
+
+          <div class="overview-grid">
+            <article class="consumption-card instrument-panel">
+              <div class="gauge" id="consumptionGauge">
+                <svg viewBox="0 0 180 112" aria-hidden="true">
+                  <path class="gauge-track" pathLength="100" d="M25 91a67 67 0 0 1 130 0" />
+                  <path class="gauge-value" id="gaugeArc" pathLength="100" d="M25 91a67 67 0 0 1 130 0" />
+                  <line class="gauge-needle" id="gaugeNeedle" x1="90" y1="91" x2="90" y2="37" />
+                  <circle class="gauge-hub" cx="90" cy="91" r="6" />
+                </svg>
+                <div class="gauge-reading">
+                  <strong id="averageConsumption">—</strong>
+                  <span>l / 100 km</span>
+                </div>
+              </div>
+              <div class="card-label">
+                <span>Průměrná spotřeba</span>
+                <span class="data-badge" id="intervalCount">Zatím bez výpočtu</span>
+              </div>
+            </article>
+
+            <div class="overview-side">
+              <article class="metric-card accent-card">
+                <span>Tento měsíc</span>
+                <strong id="monthSpent">0 Kč</strong>
+                <small id="monthRefuels">0 tankování</small>
+              </article>
+              <article class="metric-card">
+                <span>Průměrná cena</span>
+                <strong id="averagePrice">—</strong>
+                <small>Kč za litr</small>
+              </article>
+            </div>
+          </div>
+
+          <button class="primary-action" id="overviewAdd" type="button">
+            <span class="action-icon"><svg><use href="#i-fuel"></use></svg></span>
+            <span><strong>Zapsat tankování</strong><small id="lastOdometerHint">Přidej první záznam</small></span>
+            <svg class="chevron"><use href="#i-chevron"></use></svg>
+          </button>
+
+          <section class="section-block recent-section" aria-labelledby="recentTitle">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Naposledy</span>
+                <h2 id="recentTitle">Poslední tankování</h2>
+              </div>
+              <button class="text-button" type="button" data-go="history">Celá historie</button>
+            </div>
+            <div id="recentEntry"></div>
+          </section>
+
+          <aside class="tip-card" id="firstTankTip">
+            <svg><use href="#i-info"></use></svg>
+            <p><strong>Začni plnou nádrží.</strong> Při dalším doplnění do plna aplikace spočítá skutečnou spotřebu. Částečná tankování mezitím se započítají také.</p>
+          </aside>
+        </section>
+
+        <section class="view" id="view-history" data-view="history" aria-labelledby="historyTitle" hidden>
+          <div class="page-heading">
+            <div>
+              <span class="eyebrow">Všechny záznamy</span>
+              <h1 id="historyTitle">Historie</h1>
+            </div>
+            <button class="compact-add" type="button" data-add-entry><svg><use href="#i-plus"></use></svg><span>Přidat</span></button>
+          </div>
+
+          <div class="history-summary">
+            <div><span>Celkem utraceno</span><strong id="historySpent">0 Kč</strong></div>
+            <div><span>Natankováno</span><strong id="historyLiters">0 l</strong></div>
+          </div>
+
+          <div class="entry-list" id="historyList"></div>
+          <div class="empty-state" id="historyEmpty" hidden>
+            <div class="empty-icon"><svg><use href="#i-fuel"></use></svg></div>
+            <h2>Zatím tu nic není</h2>
+            <p>První plná nádrž vytvoří výchozí bod pro výpočet spotřeby.</p>
+            <button class="secondary-action" type="button" data-add-entry>Zapsat první tankování</button>
+          </div>
+        </section>
+
+        <section class="view" id="view-stats" data-view="stats" aria-labelledby="statsTitle" hidden>
+          <div class="page-heading">
+            <div>
+              <span class="eyebrow">Čísla a vývoj</span>
+              <h1 id="statsTitle">Statistiky</h1>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-tile"><span>Průměrná spotřeba</span><strong id="statsConsumption">—</strong><small>l / 100 km</small></article>
+            <article class="stat-tile"><span>Náklady na kilometr</span><strong id="statsCostKm">—</strong><small>Kč / km</small></article>
+            <article class="stat-tile"><span>Celkem utraceno</span><strong id="statsSpent">0 Kč</strong><small id="statsRefuels">0 tankování</small></article>
+            <article class="stat-tile"><span>Sledovaná vzdálenost</span><strong id="statsDistance">—</strong><small>mezi plnými nádržemi</small></article>
+          </div>
+
+          <article class="chart-card price-card">
+            <div class="chart-heading">
+              <div><span class="eyebrow">Palivo</span><h2>Cena za litr</h2></div>
+              <span id="priceDifference" class="trend-pill">Bez dat</span>
+            </div>
+            <div class="price-summary">
+              <div><span>Průměr</span><strong id="statsAveragePrice">—</strong><small>Kč / l</small></div>
+              <div><span>Nejlevněji</span><strong id="statsLowestPrice">—</strong><small>Kč / l</small></div>
+              <div><span>Nejdráže</span><strong id="statsHighestPrice">—</strong><small>Kč / l</small></div>
+            </div>
+            <div class="chart-wrap price-chart" id="priceChart"></div>
+            <div class="station-comparison">
+              <div class="station-heading"><h3>Podle čerpací stanice</h3><span>průměrná cena</span></div>
+              <div class="station-list" id="stationStats"></div>
+            </div>
+          </article>
+
+          <article class="chart-card">
+            <div class="chart-heading"><div><span class="eyebrow">Vývoj</span><h2>Spotřeba</h2></div><span id="consumptionTrend" class="trend-pill">Bez dat</span></div>
+            <div class="chart-wrap" id="consumptionChart"></div>
+          </article>
+
+          <article class="chart-card">
+            <div class="chart-heading"><div><span class="eyebrow">Po měsících</span><h2>Náklady</h2></div></div>
+            <div class="chart-wrap" id="costChart"></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-settings" data-view="settings" aria-labelledby="settingsTitle" hidden>
+          <div class="page-heading">
+            <div>
+              <span class="eyebrow">Aplikace a data</span>
+              <h1 id="settingsTitle">Nastavení</h1>
+            </div>
+          </div>
+
+          <form class="settings-card" id="vehicleForm">
+            <h2>Moje auto</h2>
+            <label class="field"><span>Název auta</span><input id="settingVehicleName" name="vehicleName" autocomplete="off" maxlength="40" /></label>
+            <div class="field-row">
+              <label class="field"><span>Motor</span><input id="settingEngine" name="engine" autocomplete="off" maxlength="20" /></label>
+              <label class="field"><span>Rok</span><input id="settingYear" name="year" inputmode="numeric" maxlength="4" /></label>
+            </div>
+            <label class="field"><span>Palivo</span>
+              <select id="settingFuel" name="fuel">
+                <option>Natural 95</option><option>Natural 98</option><option>Natural 100</option><option>Nafta</option><option>LPG</option>
+              </select>
+            </label>
+            <button class="save-settings" type="submit">Uložit auto</button>
+          </form>
+
+          <section class="settings-card">
+            <h2>Vzhled</h2>
+            <div class="segmented-control" id="themeControl" role="radiogroup" aria-label="Vzhled aplikace">
+              <button type="button" role="radio" data-theme-choice="system">Podle telefonu</button>
+              <button type="button" role="radio" data-theme-choice="light">Světlý</button>
+              <button type="button" role="radio" data-theme-choice="dark">Tmavý</button>
+            </div>
+          </section>
+
+          <section class="settings-card data-card">
+            <h2>Záloha dat</h2>
+            <p>Data jsou uložená v tomto zařízení. Zálohu si můžeš kdykoliv stáhnout a později obnovit.</p>
+            <div class="settings-actions">
+              <button type="button" id="exportJson"><svg><use href="#i-download"></use></svg><span><strong>Stáhnout zálohu</strong><small>Kompletní data aplikace</small></span></button>
+              <button type="button" id="importJson"><svg><use href="#i-upload"></use></svg><span><strong>Obnovit ze zálohy</strong><small>Vybrat soubor JSON</small></span></button>
+              <button type="button" id="exportCsv"><svg><use href="#i-download"></use></svg><span><strong>Export do CSV</strong><small>Tabulka tankování</small></span></button>
+            </div>
+            <input type="file" id="importFile" accept="application/json,.json" hidden />
+          </section>
+
+          <button class="danger-action" type="button" id="eraseData"><svg><use href="#i-trash"></use></svg>Smazat všechna tankování</button>
+          <p class="app-version">Moje tankování · verze 1.1</p>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="Hlavní navigace">
+        <button class="nav-item is-active" type="button" data-nav="overview" aria-current="page"><svg><use href="#i-gauge"></use></svg><span>Přehled</span></button>
+        <button class="nav-item" type="button" data-nav="history"><svg><use href="#i-list"></use></svg><span>Historie</span></button>
+        <button class="add-fuel-button" id="navAdd" type="button" aria-label="Zapsat tankování"><span><svg><use href="#i-plus"></use></svg></span></button>
+        <button class="nav-item" type="button" data-nav="stats"><svg><use href="#i-chart"></use></svg><span>Statistiky</span></button>
+        <button class="nav-item" type="button" data-nav="settings"><svg><use href="#i-settings"></use></svg><span>Nastavení</span></button>
+      </nav>
+    </div>
+
+    <dialog class="sheet-dialog" id="fuelDialog">
+      <form method="dialog" class="sheet" id="fuelForm" novalidate>
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <header class="sheet-header">
+          <div><span class="eyebrow" id="fuelFormEyebrow">Nový záznam</span><h2 id="fuelFormTitle">Tankování</h2></div>
+          <button class="icon-button" type="button" data-close-dialog aria-label="Zavřít"><svg><use href="#i-close"></use></svg></button>
+        </header>
+
+        <input type="hidden" id="entryId" />
+        <div class="sheet-content">
+          <div class="field-row">
+            <label class="field"><span>Datum</span><input id="fuelDate" name="date" type="date" required /></label>
+            <label class="field"><span>Stav tachometru</span><span class="input-unit"><input id="fuelOdometer" name="odometer" inputmode="numeric" placeholder="125 430" required /><em>km</em></span></label>
+          </div>
+
+          <div class="fuel-numbers">
+            <label class="field featured-field"><span>Natankováno</span><span class="input-unit"><input id="fuelLiters" name="liters" inputmode="decimal" placeholder="35,20" required /><em>l</em></span></label>
+            <label class="field"><span>Cena za litr</span><span class="input-unit"><input id="fuelPrice" name="price" inputmode="decimal" placeholder="36,90" required /><em>Kč</em></span></label>
+            <label class="field"><span>Celkem</span><span class="input-unit"><input id="fuelTotal" name="total" inputmode="decimal" placeholder="1 299" required /><em>Kč</em></span></label>
+          </div>
+
+          <label class="switch-row" for="fuelFullTank">
+            <span><strong>Plná nádrž</strong><small>Důležité pro přesný výpočet spotřeby</small></span>
+            <input id="fuelFullTank" name="fullTank" type="checkbox" checked />
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+
+          <label class="field"><span>Čerpací stanice</span>
+            <select id="fuelStation" name="station" required>
+              <option value="">Vyber stanici</option>
+              <option value="ORLEN">ORLEN</option>
+              <option value="MOL">MOL</option>
+              <option value="EuroOil">EuroOil</option>
+              <option value="Shell">Shell</option>
+              <option value="OMV">OMV</option>
+              <option value="Tank ONO">Tank ONO</option>
+              <option value="Globus">Globus</option>
+              <option value="Makro">Makro</option>
+              <option value="KM-PRONA">KM-PRONA</option>
+              <option value="AVIA">AVIA</option>
+            </select>
+          </label>
+          <label class="field"><span>Poznámka <small>nepovinné</small></span><textarea id="fuelNote" name="note" rows="2" maxlength="120" placeholder="Např. dálnice, delší cesta…"></textarea></label>
+
+          <p class="form-error" id="fuelFormError" role="alert" hidden></p>
+        </div>
+
+        <footer class="sheet-footer">
+          <button class="delete-entry" id="deleteEntry" type="button" hidden><svg><use href="#i-trash"></use></svg></button>
+          <button class="submit-entry" type="submit"><svg><use href="#i-check"></use></svg><span>Uložit tankování</span></button>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog class="confirm-dialog" id="confirmDialog">
+      <div class="confirm-card">
+        <div class="confirm-icon"><svg><use href="#i-trash"></use></svg></div>
+        <h2 id="confirmTitle">Smazat záznam?</h2>
+        <p id="confirmText">Tuto změnu nepůjde vrátit zpět.</p>
+        <div><button type="button" class="cancel-confirm">Zrušit</button><button type="button" class="accept-confirm">Smazat</button></div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
