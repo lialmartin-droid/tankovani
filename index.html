@@ -87,8 +87,12 @@
                 </div>
               </div>
               <div class="card-label">
-                <span>Průměrná spotřeba</span>
+                <span id="consumptionLabel">Celková spotřeba</span>
                 <span class="data-badge" id="intervalCount">Zatím bez výpočtu</span>
+              </div>
+              <div class="segmented-control consumption-switch" role="group" aria-label="Zobrazení spotřeby">
+                <button type="button" data-consumption-mode="interval" aria-pressed="false">Po tankování</button>
+                <button type="button" data-consumption-mode="total" aria-pressed="true">Celková</button>
               </div>
             </article>
 
@@ -186,6 +190,10 @@
 
           <article class="chart-card">
             <div class="chart-heading"><div><span class="eyebrow">Vývoj</span><h2>Spotřeba</h2></div><span id="consumptionTrend" class="trend-pill">Bez dat</span></div>
+            <div class="segmented-control consumption-switch" role="group" aria-label="Zobrazení spotřeby">
+              <button type="button" data-consumption-mode="interval" aria-pressed="false">Po tankování</button>
+              <button type="button" data-consumption-mode="total" aria-pressed="true">Celková</button>
+            </div>
             <div class="chart-wrap" id="consumptionChart"></div>
           </article>
 

@@ -1199,10 +1199,20 @@ main {
   font-weight: 750;
 }
 
-.segmented-control button[aria-checked="true"] {
+.segmented-control button[aria-checked="true"],
+.segmented-control button[aria-pressed="true"] {
   color: var(--text);
   background: var(--surface);
   box-shadow: var(--shadow-soft);
+}
+
+.consumption-switch {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 10px;
+}
+
+.consumption-card .consumption-switch {
+  margin-inline: 10px;
 }
 
 .data-card > p {

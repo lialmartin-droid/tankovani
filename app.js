@@ -1,4 +1,5 @@
 import {
+  calculateConsumptionHistory,
   calculateIntervals,
   calculatePriceSummary,
   calculateStationStats,
@@ -19,6 +20,7 @@ const DEFAULT_STATE = {
   },
   settings: {
     theme: "system",
+    consumptionMode: "total",
   },
   entries: [],
 };
@@ -48,6 +50,8 @@ const refs = {
   navItems: [...document.querySelectorAll("[data-nav]")],
   vehicleName: document.querySelector("#vehicleName"),
   vehicleDetail: document.querySelector("#vehicleDetail"),
+  consumptionButtons: [...document.querySelectorAll("[data-consumption-mode]")],
+  consumptionLabel: document.querySelector("#consumptionLabel"),
   averageConsumption: document.querySelector("#averageConsumption"),
   gaugeArc: document.querySelector("#gaugeArc"),
   gaugeNeedle: document.querySelector("#gaugeNeedle"),
@@ -111,6 +115,12 @@ initialize();
 function initialize() {
   applyTheme();
   bindNavigation();
+  refs.consumptionButtons.forEach((button) => button.addEventListener("click", () => {
+    state.settings.consumptionMode = button.dataset.consumptionMode;
+    saveState();
+    renderOverview();
+    renderStats();
+  }));
   bindEntryForm();
   bindSettings();
   bindConfirmDialog();
@@ -446,21 +456,31 @@ function renderVehicle() {
 
 function renderOverview() {
   const summary = calculateSummary(state.entries);
-  const intervals = calculateIntervals(state.entries);
+  const intervals = summary.intervals;
   const currentMonth = todayIso().slice(0, 7);
   const monthlyEntries = state.entries.filter((entry) => entry.date.startsWith(currentMonth));
-  const latest = sortEntries(state.entries).at(-1);
+  const latest = summary.latest;
 
-  refs.averageConsumption.textContent = summary.averageConsumption === null ? "—" : numberFormat.format(summary.averageConsumption);
-  refs.intervalCount.textContent = intervals.length
-    ? `${intervals.length} ${intervals.length === 1 ? "výpočet" : intervals.length < 5 ? "výpočty" : "výpočtů"}`
-    : "Zatím bez výpočtu";
+  const showInterval = state.settings.consumptionMode === "interval";
+  const lastInterval = intervals.at(-1);
+  const consumption = showInterval ? lastInterval?.consumption ?? null : summary.averageConsumption;
+
+  refs.consumptionButtons.forEach((button) => {
+    button.setAttribute("aria-pressed", String((button.dataset.consumptionMode === "interval") === showInterval));
+  });
+  refs.consumptionLabel.textContent = showInterval ? "Poslední výpočet" : "Celková spotřeba";
+  refs.averageConsumption.textContent = consumption === null ? "—" : numberFormat.format(consumption);
+  refs.intervalCount.textContent = !lastInterval
+    ? "Zatím bez výpočtu"
+    : showInterval
+      ? formatDate(lastInterval.date)
+      : `${intervals.length} ${intervals.length === 1 ? "výpočet" : intervals.length < 5 ? "výpočty" : "výpočtů"}`;
   refs.monthSpent.textContent = moneyFormat.format(summary.monthSpent);
   refs.monthRefuels.textContent = formatRefuelCount(monthlyEntries.length);
   refs.averagePrice.textContent = summary.averagePrice === null ? "—" : preciseMoneyFormat.format(summary.averagePrice);
   refs.lastOdometerHint.textContent = latest ? `Naposledy ${integerFormat.format(latest.odometer)} km` : "Přidej první záznam";
   refs.firstTankTip.hidden = intervals.length > 0;
-  updateGauge(summary.averageConsumption);
+  updateGauge(consumption);
 
   if (!latest) {
     refs.recentEntry.innerHTML = '<p class="recent-placeholder">Zatím nebylo zapsáno žádné tankování.</p>';
@@ -512,10 +532,7 @@ function createEntryMarkup(entry, interval, compact) {
 
 function renderStats() {
   const summary = calculateSummary(state.entries);
-  const intervals = calculateIntervals(state.entries);
-  const distance = intervals.reduce((sum, interval) => sum + interval.distance, 0);
-  const intervalCost = intervals.reduce((sum, interval) => sum + interval.cost, 0);
-  const costKm = distance > 0 ? intervalCost / distance : null;
+  const { intervals, intervalDistance: distance, averageCostPerKm: costKm } = summary;
 
   refs.statsConsumption.textContent = summary.averageConsumption === null ? "—" : numberFormat.format(summary.averageConsumption);
   refs.statsCostKm.textContent = costKm === null ? "—" : preciseMoneyFormat.format(costKm);
@@ -523,7 +540,8 @@ function renderStats() {
   refs.statsRefuels.textContent = formatRefuelCount(state.entries.length);
   refs.statsDistance.textContent = distance > 0 ? `${integerFormat.format(distance)} km` : "—";
   renderPriceStats();
-  renderConsumptionChart(intervals);
+  const showTotal = state.settings.consumptionMode !== "interval";
+  renderConsumptionChart(calculateConsumptionHistory(intervals, showTotal), showTotal);
   renderCostChart();
 }
 
@@ -599,7 +617,7 @@ function renderPriceChart(entries) {
   refs.priceChart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Vývoj ceny paliva za litr">${grid}<polygon class="price-area" points="${areaPoints}" /><polyline class="price-line" points="${points.join(" ")}" />${circles}${dateLabels}</svg>`;
 }
 
-function renderConsumptionChart(intervals) {
+function renderConsumptionChart(intervals, showTotal) {
   if (!intervals.length) {
     refs.consumptionChart.innerHTML = '<div class="chart-empty">Graf se zobrazí po druhém<br />tankování do plna.</div>';
     refs.consumptionTrend.textContent = "Bez dat";
@@ -630,9 +648,9 @@ function renderConsumptionChart(intervals) {
     return `<line class="chart-grid-line" x1="${margin.left}" y1="${lineY}" x2="${width - margin.right}" y2="${lineY}" /><text class="chart-label" x="${margin.left - 6}" y="${lineY + 3}" text-anchor="end">${numberFormat.format(value)}</text>`;
   }).join("");
   const dateLabels = labelIndexes(intervals.length).map((index) => `<text class="chart-label" x="${x(index)}" y="${height - 7}" text-anchor="middle">${escapeHtml(formatShortDate(intervals[index].date))}</text>`).join("");
-  const circles = intervals.map((item, index) => `<circle class="chart-point" cx="${x(index)}" cy="${y(item.consumption)}" r="4" />`).join("");
+  const circles = intervals.map((item, index) => `<circle class="chart-point" cx="${x(index)}" cy="${y(item.consumption)}" r="4"><title>${escapeHtml(formatDate(item.date))} · ${numberFormat.format(item.consumption)} l / 100 km</title></circle>`).join("");
 
-  refs.consumptionChart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Vývoj spotřeby v litrech na sto kilometrů">${grid}<polygon class="chart-area" points="${areaPoints}" /><polyline class="chart-line" points="${points.join(" ")}" />${circles}${dateLabels}</svg>`;
+  refs.consumptionChart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${showTotal ? "Vývoj celkové spotřeby" : "Spotřeba po tankování"} v litrech na sto kilometrů">${grid}<polygon class="chart-area" points="${areaPoints}" /><polyline class="chart-line" points="${points.join(" ")}" />${circles}${dateLabels}</svg>`;
 
   if (values.length < 2) {
     refs.consumptionTrend.textContent = "První výpočet";

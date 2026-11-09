@@ -57,6 +57,18 @@ export function calculateIntervals(entries) {
   return intervals;
 }
 
+export function calculateConsumptionHistory(intervals, showTotal) {
+  if (!showTotal) return intervals;
+
+  let distance = 0;
+  let liters = 0;
+  return intervals.map((interval) => {
+    distance += interval.distance;
+    liters += interval.liters;
+    return { ...interval, consumption: round((liters / distance) * 100, 2) };
+  });
+}
+
 export function calculateSummary(entries, now = new Date()) {
   const ordered = sortEntries(entries);
   const intervals = calculateIntervals(ordered);
